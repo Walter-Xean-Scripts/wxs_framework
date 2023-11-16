@@ -1,0 +1,6 @@
+---@class CharacterData
+---@field firstName string
+---@field lastName string
+---@field dateOfBirth string
+---@field height number | nil
+---@field gender string
