@@ -1,9 +1,15 @@
 # wxs_framework
 WXS Framework - A framework which aims for good code, compatability and performance.
+Right now it's under very heavy development, so it's **not** something you can or should use in production at the moment.
+Besides the QB & ESX bridges aren't finished, so there's no scripts for it currently.
 
 ## Dependencies
 - [oxmysql](https://github.com/overextended/oxmysql)
 - [wxs_core](https://github.com/Walter-Xean-Scripts/wxs_core)
+
+## Community
+WXScripts has a [Discord](https://discord.com/invite/tpJE2854th)!
+Join up and let's talk about the project.
 
 ## Current Features
 - User data handling
