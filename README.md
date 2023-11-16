@@ -16,7 +16,7 @@ WXS Framework - A framework which aims for good code, compatability and performa
 ## Planned Features
 - ESX Bridge to allow ESX resources to be used with the framework
 - QBCore Bridge to allow QBCore resources to be used with the framework
-- Mulitple first party resources for it, made with [Foact](https://docs.wxs.gg/docs/Core/Modules/Foact/)
+- Mulitple first party resources for it, with UI made with [Foact](https://docs.wxs.gg/docs/Core/Modules/Foact/)
 - Fully make all the functionality other frameworks currently provide
 
 ## Contributing
