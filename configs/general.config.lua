@@ -3,7 +3,13 @@ GeneralConfig = {}
 --[[
     General
 ]]
-GeneralConfig.SaveInterval = 10000 -- 10 seconds
+GeneralConfig.SaveInterval = 600000 -- 10 seconds
+
+GeneralConfig.Currencies = {        -- the different currencies and their defualt values
+    ["money"] = 500,
+    ["bank"] = 5000,
+    ["black_money"] = 0
+}
 
 --[[
     Inventory

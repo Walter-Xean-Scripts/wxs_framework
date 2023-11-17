@@ -1,39 +1,32 @@
 ---@class Currencies
 ---@field _currencies table<string, number>
-local Currencies = {}
+local Currencies = setmetatable({}, {
+    __newindex = function(tbl, index, value)
+        if not SubFunctions.Currencies then SubFunctions.Currencies = {} end
+        table.insert(SubFunctions.Currencies, index)
+
+        rawset(tbl, index, value)
+    end
+})
 local CurrencyMutex = Mutex.new()
 
 function Currencies.new()
+    local standardCurrencies = {}
+    for currency, default in pairs(GeneralConfig.Currencies) do
+        standardCurrencies[currency] = default
+    end
+
     return setmetatable({
-        _currencies = {}
+        _currencies = standardCurrencies
     }, {
         __index = Currencies
     })
 end
 
----Create a new currency
----@param name string
----@param default number
-function Currencies:CreateCurrency(name, default)
-    if self._currencies[name] then
-        error("Currency already exists")
-    end
-
-    self._currencies[name] = default
-end
-
----Create multiple currencies
----@param currencies table<string, number>
-function Currencies:CreateCurrencies(currencies)
-    for name, default in pairs(currencies) do
-        self:CreateCurrency(name, default)
-    end
-end
-
 ---Get a currency
 ---@param name string
 ---@return number
-function Currencies:GetCurrency(name)
+function Currencies.GetCurrency(self, name)
     if not self._currencies[name] then
         error("Currency does not exist")
     end
@@ -42,7 +35,7 @@ function Currencies:GetCurrency(name)
 end
 
 ---Get all currencies
-function Currencies:GetCurrencies()
+function Currencies.GetCurrencies(self)
     return self._currencies
 end
 
@@ -50,7 +43,7 @@ end
 ---@param name string
 ---@param amount number
 ---@return number
-function Currencies:AddCurrency(name, amount)
+function Currencies.AddCurrency(self, name, amount)
     if not self._currencies[name] then
         error("Currency does not exist")
     end
@@ -64,7 +57,7 @@ end
 
 ---Adds multiple values to multiple currency (Will mutex lock)
 ---@param currencies table<string, number>
-function Currencies:AddCurrencies(currencies)
+function Currencies.AddCurrencies(self, currencies)
     for name, amount in pairs(currencies) do
         self:AddCurrency(name, amount)
     end
@@ -74,7 +67,7 @@ end
 ---@param name string
 ---@param amount number
 ---@return number
-function Currencies:RemoveCurrency(name, amount)
+function Currencies.RemoveCurrency(self, name, amount)
     if not self._currencies[name] then
         error("Currency does not exist")
     end
@@ -88,9 +81,33 @@ end
 
 ---Removes multiple values from multiple currency (Will mutex lock)
 ---@param currencies table<string, number>
-function Currencies:RemoveCurrencies(currencies)
+function Currencies.RemoveCurrencies(self, currencies)
     for name, amount in pairs(currencies) do
         self:RemoveCurrency(name, amount)
+    end
+end
+
+---Set a currency to a value (Will mutex lock)
+---@param name string
+---@param amount number
+---@return number
+function Currencies.SetCurrency(self, name, amount)
+    if not self._currencies[name] then
+        error("Currency does not exist")
+    end
+
+    CurrencyMutex:Lock()
+    self._currencies[name] = amount
+    CurrencyMutex:Unlock()
+
+    return self._currencies[name]
+end
+
+---Set multiple currencies to multiple values (Will mutex lock)
+---@param currencies table<string, number>
+function Currencies.SetCurrencies(self, currencies)
+    for name, amount in pairs(currencies) do
+        self:SetCurrency(name, amount)
     end
 end
 

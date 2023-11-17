@@ -116,7 +116,7 @@ function WXPlayer.LoadCharacter(self, characterId)
         character.currencies = json.decode(character.currencies)
     end
 
-    self.currencies:CreateCurrencies(character.currencies or {})
+    self.currencies:SetCurrencies(character.currencies or {})
 
     if character.metadata ~= nil then
         self.metadata = json.decode(character.metadata)
