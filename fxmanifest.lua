@@ -11,6 +11,8 @@ shared_scripts {
     "@wxs_core/main.lua",
     "configs/*.lua",
     "shared/init.lua",
+    "bridges/esx/main.lua",
+    "bridges/qbcore/main.lua"
 }
 
 client_scripts {
@@ -20,7 +22,7 @@ client_scripts {
 }
 
 server_scripts {
-    '@oxmysql/lib/MySQL.lua',
+    "@oxmysql/lib/MySQL.lua",
     "server/init.lua",
     "bridges/esx/server/**/*",
     "bridges/qbcore/server/**/*"
@@ -28,7 +30,10 @@ server_scripts {
 
 files {
     "client/**/*",
-    "shared/**/*"
+    "shared/**/*",
+    "imports/**/client.lua",
+    "imports/**/shared.lua",
+    "imports/main.lua"
 }
 
 dependencies {
