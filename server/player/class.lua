@@ -99,6 +99,10 @@ end
 ---@param characterId number
 ---@return boolean
 function WXPlayer.LoadCharacter(self, characterId)
+    if self.currentCharacter then
+        return false
+    end
+
     self.mutex:Lock()
     local character <const> = db:FetchCharacter(characterId)
     if not character then
@@ -137,6 +141,44 @@ function WXPlayer.LoadCharacter(self, characterId)
     return true
 end
 
+---Unloads (Logs out) a character
+---@return boolean
+function WXPlayer.UnloadCharacter(self)
+    if not self.currentCharacter then return false end
+
+    self:Save()
+
+    self.currentCharacter = nil
+    self.currencies:SetDefault()
+    self.inventory = nil
+    self.metadata = {}
+
+    return true
+end
+
+---Returns true of the player has a loaded character
+---@return boolean
+function WXPlayer.HasLoadedCharacter(self)
+    return self.currentCharacter ~= nil
+end
+
+---Sets a metadata value
+---@param key string
+---@param value any
+function WXPlayer.SetMetadata(self, key, value)
+    self.metadata[key] = value
+end
+
+---Gets a metadata value
+---@param key string
+---@return unknown
+function WXPlayer.GetMetadata(self, key)
+    return self.metadata[key]
+end
+
+---Saves the users character data
+---@param onRs boolean|nil on resource stop
+---@return boolean
 function WXPlayer.Save(self, onRs)
     if not self.currentCharacter then return true end
 
