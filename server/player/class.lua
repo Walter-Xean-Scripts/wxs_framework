@@ -22,10 +22,11 @@ local WXPlayer = setmetatable({}, {
     end,
 })
 
-function WXPlayer.new(source, userData)
+function WXPlayer.new(source, userData, isNew)
     return setmetatable({
         source = source,
         userData = userData,
+        isNew = isNew,
         character = {
             currentCharacter = nil,
             ---@type Currencies

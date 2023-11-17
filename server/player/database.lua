@@ -2,7 +2,7 @@
 local playerDB = {}
 
 local INSERT_USER <const> =
-'INSERT INTO `users` (`license2`, `steam`, `discord`, `fivem`, `characterSlots`) VALUES (?, ?, ?, ?, ?)'
+'INSERT INTO `users` (`license2`, `steam`, `discord`, `fivem`, `characterSlots`, `group`) VALUES (?, ?, ?, ?, ?, ?)'
 function playerDB:CreateUser(source)
     local license = GetPlayerIdentifierByType(source, "license2")
     local steam = GetPlayerIdentifierByType(source, "steam")
@@ -10,7 +10,7 @@ function playerDB:CreateUser(source)
     local fivem = GetPlayerIdentifierByType(source, "fivem")
 
     local rowsChanged <const> = exports.oxmysql:query_async(INSERT_USER,
-        { license, steam, discord, fivem, GeneralConfig.MaximumCharacters })
+        { license, steam, discord, fivem, GeneralConfig.MaximumCharacters, GeneralConfig.DefaultGroup })
     if rowsChanged == 0 then
         error("Failed to create user")
         return false

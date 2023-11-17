@@ -10,8 +10,8 @@ local originalPlayerData = {}
 local connectingPlayers = {}
 local shouldRunSaveLoop = false
 
-local function createUserObject(source, userData)
-    local player = playerClass.new(source, userData)
+local function createUserObject(source, userData, isNew)
+    local player = playerClass.new(source, userData, isNew)
     originalPlayerData[source] = player
     return originalPlayerData[source]
 end
@@ -29,7 +29,7 @@ local function createUserIfNotExists(source, deferrals)
             return false
         end
 
-        createUserObject(source, newPlayerData)
+        createUserObject(source, newPlayerData, true)
         return true
     else
         createUserObject(source, playerData)
@@ -81,6 +81,8 @@ AddEventHandler('playerJoining', function(tempId)
         currentPlayers[playerId] = originalPlayerData[tempId]
         currentPlayers[playerId].source = playerId
     end
+
+    TriggerEvent('WXS:Server:UserJoined', currentPlayers[playerId])
 
     if not shouldRunSaveLoop then
         shouldRunSaveLoop = true
