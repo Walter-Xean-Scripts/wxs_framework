@@ -59,6 +59,14 @@ function Currencies.AddCurrency(self, name, amount)
         return -1
     end
 
+    if not tonumber(amount) then
+        return -1
+    end
+
+    if amount < 0 then
+        return -1
+    end
+
     CurrencyMutex:Lock()
     self._currencies[name] = self._currencies[name] + amount
     CurrencyMutex:Unlock()
@@ -81,6 +89,14 @@ end
 function Currencies.RemoveCurrency(self, name, amount)
     if not self._currencies[name] then
         error("Currency does not exist")
+        return -1
+    end
+
+    if not tonumber(amount) then
+        return -1
+    end
+
+    if amount < 0 then
         return -1
     end
 
