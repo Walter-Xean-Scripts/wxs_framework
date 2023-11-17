@@ -56,3 +56,5 @@ Framework = setmetatable({
     __index = call,
     __call = call,
 })
+
+ESX = exports.wxs_framework:getSharedObject()
