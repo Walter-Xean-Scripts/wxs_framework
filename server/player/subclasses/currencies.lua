@@ -46,11 +46,11 @@ function Currencies:GetCurrencies()
     return self._currencies
 end
 
----Set a currency to a value (Will mutex lock)
+---Add a value to a currency (Will mutex lock)
 ---@param name string
 ---@param amount number
 ---@return number
-function Currencies:ModifyCurrency(name, amount)
+function Currencies:AddCurrency(name, amount)
     if not self._currencies[name] then
         error("Currency does not exist")
     end
@@ -62,11 +62,35 @@ function Currencies:ModifyCurrency(name, amount)
     return self._currencies[name]
 end
 
----Set multiple currencies to values (Will mutex lock)
+---Adds multiple values to multiple currency (Will mutex lock)
 ---@param currencies table<string, number>
-function Currencies:ModifyCurrencies(currencies)
+function Currencies:AddCurrencies(currencies)
     for name, amount in pairs(currencies) do
-        self:ModifyCurrency(name, amount)
+        self:AddCurrency(name, amount)
+    end
+end
+
+---Removes a value from a currency (Will mutex lock)
+---@param name string
+---@param amount number
+---@return number
+function Currencies:RemoveCurrency(name, amount)
+    if not self._currencies[name] then
+        error("Currency does not exist")
+    end
+
+    CurrencyMutex:Lock()
+    self._currencies[name] = self._currencies[name] - amount
+    CurrencyMutex:Unlock()
+
+    return self._currencies[name]
+end
+
+---Removes multiple values from multiple currency (Will mutex lock)
+---@param currencies table<string, number>
+function Currencies:RemoveCurrencies(currencies)
+    for name, amount in pairs(currencies) do
+        self:RemoveCurrency(name, amount)
     end
 end
 
