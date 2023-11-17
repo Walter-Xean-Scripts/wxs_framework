@@ -2,7 +2,14 @@
 ---@field items table
 ---@field weight number
 ---@field maxWeight number
-local Inventory = {}
+local Inventory = setmetatable({}, {
+    __newindex = function(tbl, index, value)
+        if not SubFunctions.Inventory then SubFunctions.Inventory = {} end
+        table.insert(SubFunctions.Inventory, index)
+
+        rawset(tbl, index, value)
+    end
+})
 local InventoryMutex = Mutex.new()
 
 function Inventory.new(items, maxWeight)
@@ -19,7 +26,7 @@ end
 ---@param item string
 ---@param amount? number
 ---@return boolean
-function Inventory:HasItem(item, amount)
+function Inventory.HasItem(self, item, amount)
     local has = false
     for _, v in pairs(self.items) do
         if v.name == item and amount == nil or v.amount >= amount then
@@ -31,7 +38,7 @@ function Inventory:HasItem(item, amount)
     return has
 end
 
-local function compareMetadata(meta1, meta2)
+local function compareMetadata(self, meta1, meta2)
     if meta1 == nil and meta2 == nil then
         return true
     end
@@ -54,7 +61,7 @@ end
 ---@param amount? number
 ---@param metadata? table
 ---@return boolean
-function Inventory:AddItem(item, amount, metadata)
+function Inventory.AddItem(self, item, amount, metadata)
     local itemData = Items[item]
     if not itemData then
         error("Item does not exist")
@@ -101,7 +108,7 @@ end
 ---@param item string
 ---@param amount number
 ---@return boolean
-function Inventory:RemoveItem(item, amount)
+function Inventory.RemoveItem(self, item, amount)
     local itemData = Items[item]
     if not itemData then
         error("Item does not exist")
@@ -136,7 +143,7 @@ end
 ---@param newMetadata? table
 ---@param newAmount? number
 ---@return boolean
-function Inventory:ModifyItem(item, oldMetadata, newMetadata, newAmount)
+function Inventory.ModifyItem(self, item, oldMetadata, newMetadata, newAmount)
     local itemData = Items[item]
     if not itemData then
         error("Item does not exist")
@@ -168,7 +175,7 @@ end
 
 ---Get all items in the inventory
 ---@return table
-function Inventory:GetItems()
+function Inventory.GetItems(self)
     return self.items
 end
 

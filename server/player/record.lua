@@ -1,4 +1,6 @@
 PlayerFunctions = {}
+SubFunctions = {}
+
 local db = require 'server.player.database'
 local playerClass = require 'server.player.class'
 
@@ -46,22 +48,26 @@ AddEventHandler('playerConnecting', function(username, _, deferrals)
     end
 end)
 
+local function doSaveAll()
+    local totalPlayers = 0
+    local playersSaved = 0
+    for _, player in pairs(currentPlayers) do
+        totalPlayers = totalPlayers + 1
+
+        if player:Save() then
+            playersSaved = playersSaved + 1
+        end
+    end
+
+    print(string.format("^2[FW]^7 Saved %d/%d players!", playersSaved, totalPlayers))
+end
+
 local function startSaveLoop()
     CreateThread(function()
         while shouldRunSaveLoop do
             Wait(GeneralConfig.SaveInterval)
 
-            local totalPlayers = 0
-            local playersSaved = 0
-            for _, player in pairs(currentPlayers) do
-                totalPlayers = totalPlayers + 1
-
-                if player:Save() then
-                    playersSaved = playersSaved + 1
-                end
-            end
-
-            print(string.format("^2[FW]^7 Saved %d/%d players!", playersSaved, totalPlayers))
+            doSaveAll()
         end
     end)
 end
@@ -123,6 +129,15 @@ AddEventHandler('onResourceStop', function(resourceName)
     end
 end)
 
+RegisterCommand("manualSave", function(source)
+    if source > 0 then
+        print("^1[FW]^7 You can only run this command from the console.")
+        return
+    end
+
+    doSaveAll()
+end, true)
+
 --[[
     Sadly we can't export metatables, so we're doing this "hack" to make our GetPlayer function work when exported.
 ]]
@@ -132,6 +147,16 @@ local function readyPlayerObjectForExport(playerObj)
     for _, funcName in ipairs(PlayerFunctions) do
         newPlayer[funcName] = function(_, ...)
             return playerObj[funcName](playerObj, ...)
+        end
+    end
+
+    for subClassName, functions in pairs(SubFunctions) do
+        newPlayer[subClassName] = {}
+
+        for _, funcName in ipairs(functions) do
+            newPlayer[subClassName][funcName] = function(_, ...)
+                return playerObj[subClassName:lower()][funcName](playerObj[subClassName:lower()], ...)
+            end
         end
     end
 
