@@ -155,7 +155,11 @@ local function readyPlayerObjectForExport(playerObj)
 
         for _, funcName in ipairs(functions) do
             newPlayer[subClassName][funcName] = function(_, ...)
-                return playerObj[subClassName:lower()][funcName](playerObj[subClassName:lower()], ...)
+                if playerObj.character.currentCharacter == nil then
+                    return nil
+                end
+
+                return playerObj.character[subClassName:lower()][funcName](playerObj.character[subClassName:lower()], ...)
             end
         end
     end
