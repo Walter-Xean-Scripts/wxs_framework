@@ -18,6 +18,7 @@ Join up and let's talk about the project.
 - Automatic saving of characters
 - Currencies system with support for unlimited currencies
 - Basic inventory setup
+- Characters with [this module](https://github.com/Walter-Xean-Scripts/wxs_characters)
 
 ## Planned Features
 - ESX Bridge to allow ESX resources to be used with the framework
