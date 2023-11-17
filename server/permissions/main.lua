@@ -186,6 +186,8 @@ AddEventHandler("WXS:Server:UserJoined", function(playerData)
         PermissionSystem:CreateGroup(GeneralConfig.ManagementGroup, {
             "command"
         })
+
+        PermissionSystem:SetUserGroup(playerData.userData.id, GeneralConfig.ManagementGroup)
     end
 end)
 
