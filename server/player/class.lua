@@ -8,6 +8,7 @@ local db = require 'server.player.database'
 ---@field currencies Currencies
 ---@field inventory Inventory | nil
 ---@field metadata table
+---@field weapons table
 
 ---@class WXPlayer
 ---@field source number
@@ -32,6 +33,7 @@ function WXPlayer.new(source, userData)
             ---@type Inventory
             inventory = nil,
             metadata = {},
+            weapons = {}
         },
         mutex = Mutex.new()
     }, {
@@ -147,6 +149,11 @@ function WXPlayer.LoadCharacter(self, characterId)
     if character.metadata ~= nil then
         self.character.metadata = json.decode(character.metadata)
     end
+
+    if self.character.metadata.weapons then
+        self.character.weapons = self.character.metadata.weapons
+    end
+
     self.character.metadata.lastSave = os.time()
 
     self.character.currentCharacter = {
@@ -200,6 +207,15 @@ function WXPlayer.GetMetadata(self, key)
     if not self.character.currentCharacter then return nil end
 
     return self.character.metadata[key]
+end
+
+function WXPlayer.UpdateName(self, firstName, lastName)
+    if not self.character.currentCharacter then return false end
+
+    self.character.currentCharacter.firstName = firstName
+    self.character.currentCharacter.lastName = lastName
+
+    return true
 end
 
 ---Saves the users character data
