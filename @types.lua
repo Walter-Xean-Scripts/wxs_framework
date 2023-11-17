@@ -3,4 +3,4 @@
 ---@field lastName string
 ---@field dateOfBirth string
 ---@field height number | nil
----@field gender string
+---@field gender number

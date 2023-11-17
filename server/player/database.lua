@@ -33,7 +33,7 @@ end
 local SELECT_CHARACTERS <const> = 'SELECT * FROM `characters` WHERE `userId` = ?'
 function playerDB:FetchCharacters(userId)
     local result <const> = exports.oxmysql:query_async(SELECT_CHARACTERS, { userId })
-    if not result or result[1] == nil then
+    if not result then
         return nil
     end
 
@@ -53,13 +53,13 @@ end
 local INSERT_CHARACTER <const> =
 'INSERT INTO `characters` (`userId`, `firstName`, `lastName`, `dateOfBirth`, `height`, `gender`) VALUES (?, ?, ?, ?, ?, ?)'
 function playerDB:CreateCharacter(userId, characterData)
-    local result <const> = exports.oxmysql.insert_async(INSERT_CHARACTER, {
+    local result <const> = exports.oxmysql:insert_async(INSERT_CHARACTER, {
         userId,
         characterData.firstName,
         characterData.lastName,
         characterData.dateOfBirth,
+        characterData.height,
         characterData.gender,
-        characterData.height | nil,
     })
 
     if not result then
@@ -82,7 +82,7 @@ function playerDB:DeleteCharacter(characterId)
 end
 
 local UPDATE_CHARACTER <const> =
-'UPDATE `characters` SET `firstName` = ?, `lastName` = ?, `currencies` = ?, `inventory` = ?, `metadata` = ? WHERE `id` = ?'
+'UPDATE `characters` SET `firstName` = ?, `lastName` = ?, `gender` = ?, `currencies` = ?, `inventory` = ?, `metadata` = ? WHERE `id` = ?'
 function playerDB:UpdateCharacter(characterData)
     local result <const> = exports.oxmysql:query_async(UPDATE_CHARACTER, {
         characterData.firstName,
@@ -98,6 +98,20 @@ function playerDB:UpdateCharacter(characterData)
         error("Failed to update character " .. characterData.id)
         return false
     end
+
+    return true
+end
+
+function playerDB:UpdateCharacterRS(characterData)
+    exports.oxmysql:query(UPDATE_CHARACTER, {
+        characterData.firstName,
+        characterData.lastName,
+        characterData.gender,
+        json.encode(characterData.currencies),
+        json.encode(characterData.inventory),
+        json.encode(characterData.metadata),
+        characterData.id,
+    })
 
     return true
 end

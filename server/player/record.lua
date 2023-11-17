@@ -1,15 +1,17 @@
+PlayerFunctions = {}
 local db = require 'server.player.database'
 local playerClass = require 'server.player.class'
 
 ---@type table<number, WXPlayer>
 local currentPlayers = {}
+local originalPlayerData = {}
 local connectingPlayers = {}
 local shouldRunSaveLoop = false
 
 local function createUserObject(source, userData)
     local player = playerClass.new(source, userData)
-    currentPlayers[source] = player
-    return player
+    originalPlayerData[source] = player
+    return originalPlayerData[source]
 end
 
 local function createUserIfNotExists(source, deferrals)
@@ -59,7 +61,7 @@ local function startSaveLoop()
                 end
             end
 
-            print(string.format("[FW] Saved %d/%d players!", playersSaved, totalPlayers))
+            print(string.format("^2[FW]^7 Saved %d/%d players!", playersSaved, totalPlayers))
         end
     end)
 end
@@ -70,9 +72,8 @@ AddEventHandler('playerJoining', function(tempId)
 
     if tempId and connectingPlayers[tempId] then
         connectingPlayers[tempId] = nil
-        currentPlayers[playerId] = table.clone(currentPlayers[tempId])
+        currentPlayers[playerId] = originalPlayerData[tempId]
         currentPlayers[playerId].source = playerId
-        currentPlayers[tempId] = nil
     end
 
     if not shouldRunSaveLoop then
@@ -95,6 +96,55 @@ end)
 -- If the resource restarts, we'll need to re-create the user objects for the players that are currently online.
 CreateThread(function()
     for _, source in ipairs(GetPlayers()) do
-        createUserIfNotExists(source)
+        local playerId = tonumber(source)
+        if not playerId then
+            return
+        end
+
+        createUserIfNotExists(playerId)
+
+        local playerData = db:FetchUser(playerId)
+        if playerData then
+            currentPlayers[playerId] = playerClass.new(playerId, playerData)
+        end
+
+        if not shouldRunSaveLoop then
+            shouldRunSaveLoop = true
+            startSaveLoop()
+        end
     end
 end)
+
+AddEventHandler('onResourceStop', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        for _, player in pairs(currentPlayers) do
+            player:Save(true) -- we're attempting to save whatever data we can if the resource stops, so we're passing true to the save function.
+        end
+    end
+end)
+
+--[[
+    Sadly we can't export metatables, so we're doing this "hack" to make our GetPlayer function work when exported.
+]]
+local function readyPlayerObjectForExport(playerObj)
+    local newPlayer = {}
+
+    for _, funcName in ipairs(PlayerFunctions) do
+        newPlayer[funcName] = function(_, ...)
+            return playerObj[funcName](playerObj, ...)
+        end
+    end
+
+    return newPlayer
+end
+
+local function GetPlayerForExport(source)
+    local player = currentPlayers[source]
+
+    if player then
+        return readyPlayerObjectForExport(player)
+    else
+        return nil
+    end
+end
+exports("GetPlayer", GetPlayerForExport)
