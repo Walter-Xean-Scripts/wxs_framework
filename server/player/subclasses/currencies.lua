@@ -23,12 +23,22 @@ function Currencies.new()
     })
 end
 
+function Currencies.SetDefault(self)
+    local standardCurrencies = {}
+    for currency, default in pairs(GeneralConfig.Currencies) do
+        standardCurrencies[currency] = default
+    end
+
+    self._currencies = standardCurrencies
+end
+
 ---Get a currency
 ---@param name string
 ---@return number
 function Currencies.GetCurrency(self, name)
     if not self._currencies[name] then
         error("Currency does not exist")
+        return -1
     end
 
     return self._currencies[name]
@@ -46,6 +56,7 @@ end
 function Currencies.AddCurrency(self, name, amount)
     if not self._currencies[name] then
         error("Currency does not exist")
+        return -1
     end
 
     CurrencyMutex:Lock()
@@ -70,6 +81,7 @@ end
 function Currencies.RemoveCurrency(self, name, amount)
     if not self._currencies[name] then
         error("Currency does not exist")
+        return -1
     end
 
     CurrencyMutex:Lock()
@@ -94,6 +106,7 @@ end
 function Currencies.SetCurrency(self, name, amount)
     if not self._currencies[name] then
         error("Currency does not exist")
+        return -1
     end
 
     CurrencyMutex:Lock()
