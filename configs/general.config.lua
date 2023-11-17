@@ -12,6 +12,11 @@ GeneralConfig.Currencies = {        -- the different currencies and their defual
 }
 
 --[[
+    Multicharacter
+]]
+GeneralConfig.MaximumCharacters = 2 -- How many slots a player without granted slots can have
+
+--[[
     Inventory
 ]]
 GeneralConfig.MaximumPlayerWeight = 50000
