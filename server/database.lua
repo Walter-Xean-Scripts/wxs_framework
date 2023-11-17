@@ -7,6 +7,7 @@ local ENSURE_USERS = [[
         `steam` varchar(255) DEFAULT NULL,
         `discord` varchar(255) DEFAULT NULL,
         `fivem` varchar(255) DEFAULT NULL,
+        `characterSlots` int(11) DEFAULT NULL,
         PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 ]]

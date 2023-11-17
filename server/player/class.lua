@@ -34,6 +34,18 @@ function WXPlayer.new(source, userData)
     })
 end
 
+function WXPlayer.UpdateCharacterSlots(self, newSlots)
+    self.mutex:Lock()
+    local success = db:UpdateCharacterSlots(self.userData.id, newSlots)
+    self.mutex:Unlock()
+
+    if success then
+        self.userData.characterSlots = newSlots
+    end
+
+    return success
+end
+
 ---Get's the users available characters
 ---@return table|nil
 function WXPlayer.GetCharacters(self)
@@ -72,6 +84,11 @@ end
 ---@param characterData CharacterData
 ---@return boolean
 function WXPlayer.CreateCharacter(self, characterData)
+    local currentCharacters = db:FetchCharacters(self.userData.id)
+    if currentCharacters and #currentCharacters >= self.userData.characterSlots then
+        return false
+    end
+
     local success, err = validateCharacterData(characterData)
     if not validateCharacterData(characterData) then
         print("[FW] Failed to create character: " .. err .. " (" .. self.userData.id .. ")")

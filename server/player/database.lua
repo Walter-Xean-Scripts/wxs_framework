@@ -2,16 +2,28 @@
 local playerDB = {}
 
 local INSERT_USER <const> =
-'INSERT INTO `users` (`license2`, `steam`, `discord`, `fivem`) VALUES (?, ?, ?, ?)'
+'INSERT INTO `users` (`license2`, `steam`, `discord`, `fivem`, `characterSlots`) VALUES (?, ?, ?, ?, ?)'
 function playerDB:CreateUser(source)
     local license = GetPlayerIdentifierByType(source, "license2")
     local steam = GetPlayerIdentifierByType(source, "steam")
     local discord = GetPlayerIdentifierByType(source, "discord")
     local fivem = GetPlayerIdentifierByType(source, "fivem")
 
-    local rowsChanged <const> = exports.oxmysql:query_async(INSERT_USER, { license, steam, discord, fivem })
+    local rowsChanged <const> = exports.oxmysql:query_async(INSERT_USER,
+        { license, steam, discord, fivem, GeneralConfig.MaximumCharacters })
     if rowsChanged == 0 then
         error("Failed to create user")
+        return false
+    end
+
+    return true
+end
+
+local UPDATE_CHARACTER_SLOTS <const> = 'UPDATE `users` SET `characterSlots` = ? WHERE `id` = ?'
+function playerDB:UpdateCharacterSlots(userId, characterSlots)
+    local result <const> = exports.oxmysql:query_async(UPDATE_CHARACTER_SLOTS, { characterSlots, userId })
+    if not result then
+        error("Failed to update character slots for user " .. userId)
         return false
     end
 
