@@ -12,6 +12,9 @@ print("A framework that values good code, compatability and performance.")
 print("Created by WXScripts.")
 print("---------------------------------")
 
+--[[
+    Exports
+]]
 local function SendDiscordLog(webhook, title, message)
     DiscordLog:Send(webhook, title, message)
 end

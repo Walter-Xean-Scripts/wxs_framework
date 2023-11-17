@@ -183,6 +183,8 @@ end
 ---@param key string
 ---@param value any
 function WXPlayer.SetMetadata(self, key, value)
+    if not self.currentCharacter then return end
+
     self.metadata[key] = value
 end
 
@@ -190,6 +192,8 @@ end
 ---@param key string
 ---@return unknown
 function WXPlayer.GetMetadata(self, key)
+    if not self.currentCharacter then return nil end
+
     return self.metadata[key]
 end
 
