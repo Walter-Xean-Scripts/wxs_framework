@@ -3,13 +3,16 @@ local currencies = require 'server.player.subclasses.currencies'
 local inventory = require 'server.player.subclasses.inventory'
 local db = require 'server.player.database'
 
----@class WXPlayer
----@field source number
----@field userData table
+---@class CharacterData
 ---@field currentCharacter table | nil
 ---@field currencies Currencies
 ---@field inventory Inventory | nil
 ---@field metadata table
+
+---@class WXPlayer
+---@field source number
+---@field userData table
+---@field character CharacterData
 ---@field mutex Mutex
 local WXPlayer = setmetatable({}, {
     __newindex = function(tbl, key, value)
@@ -22,12 +25,14 @@ function WXPlayer.new(source, userData)
     return setmetatable({
         source = source,
         userData = userData,
-        currentCharacter = nil,
-        ---@type Currencies
-        currencies = currencies.new(),
-        ---@type Inventory
-        inventory = nil,
-        metadata = {},
+        character = {
+            currentCharacter = nil,
+            ---@type Currencies
+            currencies = currencies.new(),
+            ---@type Inventory
+            inventory = nil,
+            metadata = {},
+        },
         mutex = Mutex.new()
     }, {
         __index = WXPlayer
@@ -116,7 +121,7 @@ end
 ---@param characterId number
 ---@return boolean
 function WXPlayer.LoadCharacter(self, characterId)
-    if self.currentCharacter then
+    if self.character.currentCharacter then
         return false
     end
 
@@ -131,20 +136,20 @@ function WXPlayer.LoadCharacter(self, characterId)
         character.inventory = json.decode(character.inventory)
     end
 
-    self.inventory = inventory.new(character.inventory or {}, GeneralConfig.MaximumPlayerWeight)
+    self.character.inventory = inventory.new(character.inventory or {}, GeneralConfig.MaximumPlayerWeight)
 
     if character.currencies ~= nil then
         character.currencies = json.decode(character.currencies)
     end
 
-    self.currencies:SetCurrencies(character.currencies or {})
+    self.character.currencies:SetCurrencies(character.currencies or {})
 
     if character.metadata ~= nil then
-        self.metadata = json.decode(character.metadata)
+        self.character.metadata = json.decode(character.metadata)
     end
-    self.metadata.lastSave = os.time()
+    self.character.metadata.lastSave = os.time()
 
-    self.currentCharacter = {
+    self.character.currentCharacter = {
         id = character.id,
         firstName = character.firstName,
         lastName = character.lastName,
@@ -161,14 +166,14 @@ end
 ---Unloads (Logs out) a character
 ---@return boolean
 function WXPlayer.UnloadCharacter(self)
-    if not self.currentCharacter then return false end
+    if not self.character.currentCharacter then return false end
 
     self:Save()
 
-    self.currentCharacter = nil
-    self.currencies:SetDefault()
-    self.inventory = nil
-    self.metadata = {}
+    self.character.currentCharacter = nil
+    self.character.currencies:SetDefault()
+    self.character.inventory = nil
+    self.character.metadata = {}
 
     return true
 end
@@ -176,53 +181,54 @@ end
 ---Returns true of the player has a loaded character
 ---@return boolean
 function WXPlayer.HasLoadedCharacter(self)
-    return self.currentCharacter ~= nil
+    return self.character.currentCharacter ~= nil
 end
 
 ---Sets a metadata value
 ---@param key string
 ---@param value any
 function WXPlayer.SetMetadata(self, key, value)
-    if not self.currentCharacter then return end
+    if not self.character.currentCharacter then return end
 
-    self.metadata[key] = value
+    self.character.metadata[key] = value
 end
 
 ---Gets a metadata value
 ---@param key string
 ---@return unknown
 function WXPlayer.GetMetadata(self, key)
-    if not self.currentCharacter then return nil end
+    if not self.character.currentCharacter then return nil end
 
-    return self.metadata[key]
+    return self.character.metadata[key]
 end
 
 ---Saves the users character data
 ---@param onRs boolean|nil on resource stop
 ---@return boolean
 function WXPlayer.Save(self, onRs)
-    if not self.currentCharacter then return true end
+    if not self.character.currentCharacter then return true end
 
     local ped = GetPlayerPed(self.source)
     local lastCoords = GetEntityCoords(ped)
-    self.metadata.lastCoords = vector3(lastCoords.x, lastCoords.y, lastCoords.z - 1.0)
-    self.metadata.lastHeading = GetEntityHeading(ped)
+    self.character.metadata.lastCoords = vector3(lastCoords.x, lastCoords.y, lastCoords.z - 1.0)
+    self.character.metadata.lastHeading = GetEntityHeading(ped)
 
-    if not self.metadata.playtime then
-        self.metadata.playtime = 0 + os.time() - self.metadata.lastSave
+    if not self.character.metadata.playtime then
+        self.character.metadata.playtime = 0 + os.time() - self.character.metadata.lastSave
     else
-        self.metadata.playtime = self.metadata.playtime + os.time() - self.metadata.lastSave
+        self.character.metadata.playtime = self.character.metadata.playtime + os.time() -
+            self.character.metadata.lastSave
     end
-    self.metadata.lastSave = nil -- we don't want to store this in the database
+    self.character.metadata.lastSave = nil -- we don't want to store this in the database
 
     local data = {
-        firstName = self.currentCharacter.firstName,
-        lastName = self.currentCharacter.lastName,
-        gender = self.currentCharacter.gender,
-        currencies = self.currencies:GetCurrencies(),
-        inventory = self.inventory:GetItems(),
-        metadata = self.metadata,
-        id = self.currentCharacter.id
+        firstName = self.character.currentCharacter.firstName,
+        lastName = self.character.currentCharacter.lastName,
+        gender = self.character.currentCharacter.gender,
+        currencies = self.character.currencies:GetCurrencies(),
+        inventory = self.character.inventory:GetItems(),
+        metadata = self.character.metadata,
+        id = self.character.currentCharacter.id
     }
 
     self.mutex:Lock()
@@ -234,7 +240,7 @@ function WXPlayer.Save(self, onRs)
     end
     self.mutex:Unlock()
 
-    self.metadata.lastSave = os.time()
+    self.character.metadata.lastSave = os.time()
 
     return didSave
 end

@@ -193,7 +193,7 @@ exports("GetPlayerByUserId", GetPlayerByUserId)
 local function GetPlayerByCharacterId(characterId)
     local playerData = {}
     for _, player in pairs(currentPlayers) do
-        if player.currentCharacter and player.currentCharacter.id == characterId then
+        if player.character.currentCharacter and player.character.currentCharacter.id == characterId then
             playerData = player
         end
     end
