@@ -7,10 +7,6 @@ Besides the QB & ESX bridges aren't finished, so there's no scripts for it curre
 - [oxmysql](https://github.com/overextended/oxmysql)
 - [wxs_core](https://github.com/Walter-Xean-Scripts/wxs_core)
 
-## Community
-WXScripts has a [Discord](https://discord.com/invite/tpJE2854th)!
-Join up and let's talk about the project.
-
 ## Current Features
 - User data handling
 - Multi-character system
