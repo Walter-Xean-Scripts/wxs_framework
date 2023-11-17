@@ -22,22 +22,6 @@ function Inventory.new(items, maxWeight)
     })
 end
 
----Check is the inventory has an item, with an optional amount
----@param item string
----@param amount? number
----@return boolean
-function Inventory.HasItem(self, item, amount)
-    local has = false
-    for _, v in pairs(self.items) do
-        if v.name == item and amount == nil or v.amount >= amount then
-            has = true
-            break
-        end
-    end
-
-    return has
-end
-
 local function compareMetadata(self, meta1, meta2)
     if meta1 == nil and meta2 == nil then
         return true
@@ -54,6 +38,37 @@ local function compareMetadata(self, meta1, meta2)
     end
 
     return true
+end
+
+function Inventory.UpdateMaxWeight(self, newMaxWeight)
+    self.maxWeight = newMaxWeight
+end
+
+---Check is the inventory has an item, with an optional amount
+---@param item string
+---@param amount? number
+---@param metadata? table
+---@return boolean
+function Inventory.HasItem(self, item, amount, metadata)
+    local has = false
+    for _, v in pairs(self.items) do
+        if not metadata or compareMetadata(v.metadata, metadata) then
+            if v.name == item and amount == nil or v.amount >= amount then
+                has = true
+                break
+            end
+        end
+    end
+
+    return has
+end
+
+function Inventory.GetItem(self, itemName)
+    for _, v in pairs(self.items) do
+        if v.name == itemName then
+            return v
+        end
+    end
 end
 
 ---Adds an item to the inventory, with an optional amount and metadata (Will mutex lock)
@@ -177,6 +192,24 @@ end
 ---@return table
 function Inventory.GetItems(self)
     return self.items
+end
+
+function Inventory.CanCarryItem(self, item, count)
+    local itemData = Items[item]
+    if not itemData then
+        error("Item does not exist")
+        return false
+    end
+
+    if not count then
+        count = 1
+    end
+
+    return self.weight + (itemData.weight * count) <= self.maxWeight
+end
+
+function Inventory.GetWeight(self)
+    return self.weight
 end
 
 return Inventory
