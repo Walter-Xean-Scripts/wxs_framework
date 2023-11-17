@@ -173,3 +173,35 @@ local function GetPlayerForExport(source)
     end
 end
 exports("GetPlayer", GetPlayerForExport)
+
+local function GetPlayerByUserId(userId)
+    local playerData = {}
+    for _, player in pairs(currentPlayers) do
+        if player.userData.id == userId then
+            playerData = player
+        end
+    end
+
+    if playerData then
+        return readyPlayerObjectForExport(playerData)
+    end
+
+    return nil
+end
+exports("GetPlayerByUserId", GetPlayerByUserId)
+
+local function GetPlayerByCharacterId(characterId)
+    local playerData = {}
+    for _, player in pairs(currentPlayers) do
+        if player.currentCharacter and player.currentCharacter.id == characterId then
+            playerData = player
+        end
+    end
+
+    if playerData then
+        return readyPlayerObjectForExport(playerData)
+    end
+
+    return nil
+end
+exports("GetPlayerByCharacterId", GetPlayerByCharacterId)
