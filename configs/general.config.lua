@@ -11,6 +11,11 @@ GeneralConfig.Currencies = {        -- the different currencies and their defual
     ["black_money"] = 0
 }
 
+GeneralConfig.ManagementGroup =
+"manager"                           -- The group that by default has every permission, will be auto assigned to the first player that joins.
+
+GeneralConfig.DefaultGroup = "user" -- The group that every player will be assigned to by default.
+
 --[[
     Multicharacter
 ]]
